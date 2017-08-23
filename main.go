@@ -45,9 +45,8 @@ var (
 var (
 	// flags
 	slackWebhookURL       = kingpin.Flag("slack-webhook-url", "A slack webhook url to allow sending messages.").Envar("ESTAFETTE_SLACK_WEBHOOK").Required().String()
-	slackChannels         = kingpin.Flag("slack-channels", "A comma-separated list of Slack channels to send build status to.").Envar("ESTAFETTE_EXTENSION_CHANNELS").String()
-	slackUsers            = kingpin.Flag("slack-users", "A comma-separated list of Slack users to send build status to.").Envar("ESTAFETTE_EXTENSION_USERS").String()
-	gitName               = kingpin.Flag("git-name", "The owner plus repository name.").Envar("ESTAFETTE_GIT_NAME").Required().String()
+	slackChannels         = kingpin.Flag("slack-channels", "A comma-separated list of Slack channels to send build status to.").Envar("ESTAFETTE_EXTENSION_CHANNELS").Required().String()
+	buildName             = kingpin.Flag("build-name", "The name of the pipeline that succeeds or fails.").Envar("ESTAFETTE_EXTENSION_NAME").Required().String()
 	gitBranch             = kingpin.Flag("git-branch", "The branch to clone.").Envar("ESTAFETTE_GIT_BRANCH").Required().String()
 	gitRevision           = kingpin.Flag("git-revision", "The revision to check out.").Envar("ESTAFETTE_GIT_REVISION").Required().String()
 	estafetteBuildVersion = kingpin.Flag("estafette-build-version", "The current build version of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_VERSION").Required().String()
@@ -84,9 +83,9 @@ func main() {
 		message := ""
 		switch *estafetteBuildStatus {
 		case "succeeded":
-			message = fmt.Sprintf("Build %v - repository %v for branch %v and revision %v - succeeded", *estafetteBuildVersion, *gitName, *gitBranch, *gitRevision)
+			message = fmt.Sprintf("Build %v of %v - branch %v and revision %v - succeeded", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 		case "failed":
-			message = fmt.Sprintf("Build %v - repository %v for branch %v and revision %v - failed", *estafetteBuildVersion, *gitName, *gitBranch, *gitRevision)
+			message = fmt.Sprintf("Build %v of $v - branch %v and revision %v - failed", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 		}
 
 		// split on comma and loop through channels
