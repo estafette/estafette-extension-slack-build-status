@@ -1,16 +1,13 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
+	"fmt"
 	stdlog "log"
-	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/sethgrid/pester"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -47,10 +44,14 @@ var (
 
 var (
 	// flags
-	slackWebhookURL      = kingpin.Flag("slack-webhook-url", "A slack webhook url to allow sending messages.").Envar("ESTAFETTE_SLACK_WEBHOOK").Required().String()
-	estafetteBuildStatus = kingpin.Flag("estafette-build-status", "The current build status of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_STATUS").Required().String()
-	slackChannels        = kingpin.Flag("slack-channels", "A comma-separated list of Slack channels to send build status to.").Envar("ESTAFETTE_EXTENSION_CHANNELS").String()
-	slackUsers           = kingpin.Flag("slack-users", "A comma-separated list of Slack users to send build status to.").Envar("ESTAFETTE_EXTENSION_USERS").String()
+	slackWebhookURL       = kingpin.Flag("slack-webhook-url", "A slack webhook url to allow sending messages.").Envar("ESTAFETTE_SLACK_WEBHOOK").Required().String()
+	slackChannels         = kingpin.Flag("slack-channels", "A comma-separated list of Slack channels to send build status to.").Envar("ESTAFETTE_EXTENSION_CHANNELS").String()
+	slackUsers            = kingpin.Flag("slack-users", "A comma-separated list of Slack users to send build status to.").Envar("ESTAFETTE_EXTENSION_USERS").String()
+	gitName               = kingpin.Flag("git-name", "The owner plus repository name.").Envar("ESTAFETTE_GIT_NAME").Required().String()
+	gitBranch             = kingpin.Flag("git-branch", "The branch to clone.").Envar("ESTAFETTE_GIT_BRANCH").Required().String()
+	gitRevision           = kingpin.Flag("git-revision", "The revision to check out.").Envar("ESTAFETTE_GIT_REVISION").Required().String()
+	estafetteBuildVersion = kingpin.Flag("estafette-build-version", "The current build version of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_VERSION").Required().String()
+	estafetteBuildStatus  = kingpin.Flag("estafette-build-status", "The current build status of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_STATUS").Required().String()
 )
 
 func main() {
@@ -75,39 +76,30 @@ func main() {
 		Str("goVersion", goVersion).
 		Msg("Starting estafette-extension-slack-build-status...")
 
-	var requestBody io.Reader
+	slackWebhookClient := NewSlackWebhookClient(*slackWebhookURL)
 
-	slackMessageBody := SlackMessageBody{}
-	data, err := json.Marshal(slackMessageBody)
-	if err != nil {
-		log.Error().Err(err).Interface("body", slackMessageBody).Msg("Failed marshalling SlackMessageBody")
-		return
-	}
-	requestBody = bytes.NewReader(data)
+	if *slackChannels != "" {
 
-	// create client, in order to add headers
-	client := pester.New()
-	client.MaxRetries = 3
-	client.Backoff = pester.ExponentialJitterBackoff
-	client.KeepLog = true
-	request, err := http.NewRequest("POST", *slackWebhookURL, requestBody)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed creating http client")
-		return
-	}
+		// set message depending on status
+		message := ""
+		switch *estafetteBuildStatus {
+		case "succeeded":
+			message = fmt.Sprintf("Build %v - repository %v for branch %v and revision %v - succeeded", *estafetteBuildVersion, *gitName, *gitBranch, *gitRevision)
+		case "failed":
+			message = fmt.Sprintf("Build %v - repository %v for branch %v and revision %v - failed", *estafetteBuildVersion, *gitName, *gitBranch, *gitRevision)
+		}
 
-	// add headers
-	//request.Header.Add("X-Estafette-Event", eventType)
+		// split on comma and loop through channels
+		channels := strings.Split(*slackChannels, ",")
 
-	// perform actual request
-	response, err := client.Do(request)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed performing http request to Slack")
-		return
+		for i := range channels {
+			err := slackWebhookClient.SendMessage(channels[i], message)
+			if err != nil {
+				log.Error().Err(err).Msg("Sending build status to Slack failed")
+				os.Exit(1)
+			}
+		}
 	}
 
-	defer response.Body.Close()
-
-	log.Info().
-		Msg("Finished estafette-extension-slack-build-status...")
+	log.Info().Msg("Finished estafette-extension-slack-build-status...")
 }
