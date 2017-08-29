@@ -85,7 +85,7 @@ func main() {
 		case "succeeded":
 			message = fmt.Sprintf("Build %v of %v - branch %v and revision %v - succeeded", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 		case "failed":
-			message = fmt.Sprintf("Build %v of $v - branch %v and revision %v - failed", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
+			message = fmt.Sprintf("Build %v of %v - branch %v and revision %v - failed", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 		}
 
 		// split on comma and loop through channels
