@@ -35,7 +35,7 @@ func (sc *slackWebhookClientImpl) SendMessage(target, message string) (err error
 	slackMessageBody := SlackMessageBody{
 		Channel:  target,
 		Text:     message,
-		Username: "estafette-extension-slack-build-status",
+		Username: "estafette-ci",
 	}
 
 	data, err := json.Marshal(slackMessageBody)
