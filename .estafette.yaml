@@ -49,10 +49,10 @@ pipelines:
 
   slack-notify:
     image: extensions/slack-build-status:stable
-    env:
-      ESTAFETTE_SLACK_WEBHOOK: estafette.secret(IUcwmw0ZhriLvqhD.4DOkD1-c_44STKbxbD3n4zzz67SYJCcW0_4RKWbL7LefQW4zjRU8UOrANuY9xC89BRmVmXf4GppNt5SULEjx6VI_CcdlfXbCQlgkTs3pO2a66-0Q9k0W7t7nrUif)
+    webhook: estafette.secret(IUcwmw0ZhriLvqhD.4DOkD1-c_44STKbxbD3n4zzz67SYJCcW0_4RKWbL7LefQW4zjRU8UOrANuY9xC89BRmVmXf4GppNt5SULEjx6VI_CcdlfXbCQlgkTs3pO2a66-0Q9k0W7t7nrUif)
     name: ${ESTAFETTE_LABEL_APP}
     channels:
     - '#build-status'
     when:
-      status == 'failed'
+      status == 'failed' ||
+      status == 'succeeded'
