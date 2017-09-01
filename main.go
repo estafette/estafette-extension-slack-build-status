@@ -92,13 +92,16 @@ func main() {
 	if *slackChannels != "" {
 
 		// set message depending on status
+		title := ""
 		message := ""
 		color := ""
 		switch *estafetteBuildStatus {
 		case "succeeded":
+			title = "Build succeeded!"
 			message = fmt.Sprintf("Build *%v* of *%v* - branch _%v_ and revision _%v_ - succeeded", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 			color = "good"
 		case "failed":
+			title = "Build failed!"
 			message = fmt.Sprintf("Build *%v* of *%v* - branch _%v_ and revision _%v_ - failed", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 			color = "danger"
 		}
@@ -107,7 +110,7 @@ func main() {
 		channels := strings.Split(*slackChannels, ",")
 
 		for i := range channels {
-			err := slackWebhookClient.SendMessage(channels[i], message, color)
+			err := slackWebhookClient.SendMessage(channels[i], title, message, color)
 			if err != nil {
 				log.Error().Err(err).Msg("Sending build status to Slack failed")
 				os.Exit(1)

@@ -13,7 +13,7 @@ import (
 
 // SlackWebhookClient is used to send messages to slack using a webhook
 type SlackWebhookClient interface {
-	SendMessage(string, string, string) error
+	SendMessage(string, string, string, string) error
 }
 
 type slackWebhookClientImpl struct {
@@ -28,7 +28,7 @@ func NewSlackWebhookClient(webhookURL string) SlackWebhookClient {
 }
 
 // GetAccessToken returns an access token to access the Bitbucket api
-func (sc *slackWebhookClientImpl) SendMessage(target, message, color string) (err error) {
+func (sc *slackWebhookClientImpl) SendMessage(target, title, message, color string) (err error) {
 
 	var requestBody io.Reader
 
@@ -38,6 +38,7 @@ func (sc *slackWebhookClientImpl) SendMessage(target, message, color string) (er
 		Attachments: []SlackMessageAttachment{
 			SlackMessageAttachment{
 				Fallback: message,
+				Title:    title,
 				Text:     message,
 				Color:    color,
 				MarkdownIn: []string{
