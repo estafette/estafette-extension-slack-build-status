@@ -40,6 +40,9 @@ func (sc *slackWebhookClientImpl) SendMessage(target, message, color string) (er
 				Fallback: message,
 				Text:     message,
 				Color:    color,
+				MarkdownIn: []string{
+					"text",
+				},
 			},
 		},
 	}
