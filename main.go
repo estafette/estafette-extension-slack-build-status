@@ -80,7 +80,7 @@ func main() {
 		log.Fatal().Msg("Either flag slack-webhook-url or slack-extension-webhook has to be set")
 	}
 
-	log.Debug().Interface("envvars", os.Environ).Msg("All environment variables")
+	log.Debug().Interface("envvars", os.Environ()).Msg("All environment variables")
 
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
