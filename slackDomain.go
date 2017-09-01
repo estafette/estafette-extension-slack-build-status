@@ -4,7 +4,7 @@ package main
 type SlackMessageBody struct {
 	Channel     string                   `json:"channel"`
 	Username    string                   `json:"username"`
-	Text        string                   `json:"text"`
+	Text        string                   `json:"text,omitempty"`
 	Attachments []SlackMessageAttachment `json:"attachments,omitempty"`
 }
 
