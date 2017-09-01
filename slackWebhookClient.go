@@ -34,7 +34,7 @@ func (sc *slackWebhookClientImpl) SendMessage(target, message, color string) (er
 
 	slackMessageBody := SlackMessageBody{
 		Channel:  target,
-		Username: "estafette-ci",
+		Username: "Estafette CI",
 		Attachments: []SlackMessageAttachment{
 			SlackMessageAttachment{
 				Fallback: message,
