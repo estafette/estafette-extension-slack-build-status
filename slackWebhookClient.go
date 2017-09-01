@@ -50,7 +50,7 @@ func (sc *slackWebhookClientImpl) SendMessage(target, message string) (err error
 	client.MaxRetries = 3
 	client.Backoff = pester.ExponentialJitterBackoff
 	client.KeepLog = true
-	request, err := http.NewRequest("POST", *slackWebhookURL, requestBody)
+	request, err := http.NewRequest("POST", sc.webhookURL, requestBody)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed creating http client")
 		return

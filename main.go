@@ -83,7 +83,7 @@ func main() {
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
 	if *slackExtensionWebhookURL != "" {
-		log.Debug().Str("slackWebhookURL", *slackWebhookURL).Str("slackExtensionWebhookURL", *slackExtensionWebhookURL).Msg("Overriding slackWebhookURL with slackExtensionWebhookURL")
+		log.Debug().Msg("Overriding slackWebhookURL with slackExtensionWebhookURL")
 		webhookURL = *slackExtensionWebhookURL
 	}
 
