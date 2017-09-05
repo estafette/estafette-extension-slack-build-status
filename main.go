@@ -97,11 +97,11 @@ func main() {
 		color := ""
 		switch *estafetteBuildStatus {
 		case "succeeded":
-			title = "Build succeeded!"
+			title = fmt.Sprintf("Build %v succeeded!", *buildName)
 			message = fmt.Sprintf("Build *%v* of *%v* - branch _%v_ and revision _%v_ - succeeded", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 			color = "good"
 		case "failed":
-			title = "Build failed!"
+			title = fmt.Sprintf("Build %v failed!", *buildName)
 			message = fmt.Sprintf("Build *%v* of *%v* - branch _%v_ and revision _%v_ - failed", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
 			color = "danger"
 		}
