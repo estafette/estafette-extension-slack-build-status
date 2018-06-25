@@ -2,15 +2,12 @@ package main
 
 import (
 	"fmt"
-	stdlog "log"
+	"log"
 	"os"
 	"runtime"
 	"strings"
 
 	"github.com/alecthomas/kingpin"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -59,30 +56,21 @@ func main() {
 	// parse command line parameters
 	kingpin.Parse()
 
-	// pretty print to make build logs more readable
-	log.Logger = zerolog.New(os.Stdout).With().
-		Logger()
-
-	// use zerolog for any logs sent via standard log library
-	stdlog.SetFlags(0)
-	stdlog.SetOutput(log.Logger)
+	// log to stdout and hide timestamp
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 	// log startup message
-	log.Info().
-		Str("branch", branch).
-		Str("revision", revision).
-		Str("buildDate", buildDate).
-		Str("goVersion", goVersion).
-		Msg("Starting estafette-extension-slack-build-status...")
+	log.Printf("Starting estafette-extension-slack-build-status version %v...", version)
 
 	if *slackWebhookURL == "" && *slackExtensionWebhookURL == "" {
-		log.Fatal().Msg("Either flag slack-webhook-url or slack-extension-webhook has to be set")
+		log.Fatal("Either flag slack-webhook-url or slack-extension-webhook has to be set")
 	}
 
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
 	if *slackExtensionWebhookURL != "" {
-		log.Debug().Msg("Overriding slackWebhookURL with slackExtensionWebhookURL")
+		log.Print("Overriding slackWebhookURL with slackExtensionWebhookURL")
 		webhookURL = *slackExtensionWebhookURL
 	}
 
@@ -111,11 +99,11 @@ func main() {
 		for i := range channels {
 			err := slackWebhookClient.SendMessage(channels[i], title, message, color)
 			if err != nil {
-				log.Error().Err(err).Msg("Sending build status to Slack failed")
+				log.Printf("Sending build status to Slack failed: %v", err)
 				os.Exit(1)
 			}
 		}
 	}
 
-	log.Info().Msg("Finished estafette-extension-slack-build-status...")
+	log.Print("Finished estafette-extension-slack-build-status...")
 }

@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/sethgrid/pester"
-
-	"github.com/rs/zerolog/log"
 )
 
 // SlackWebhookClient is used to send messages to slack using a webhook
@@ -50,7 +49,7 @@ func (sc *slackWebhookClientImpl) SendMessage(target, title, message, color stri
 
 	data, err := json.Marshal(slackMessageBody)
 	if err != nil {
-		log.Error().Err(err).Interface("body", slackMessageBody).Msg("Failed marshalling SlackMessageBody")
+		log.Printf("Failed marshalling SlackMessageBody: %v. Error: %v", slackMessageBody, err)
 		return
 	}
 	requestBody = bytes.NewReader(data)
@@ -62,7 +61,7 @@ func (sc *slackWebhookClientImpl) SendMessage(target, title, message, color stri
 	client.KeepLog = true
 	request, err := http.NewRequest("POST", sc.webhookURL, requestBody)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed creating http client")
+		log.Printf("Failed creating http client: %v", err)
 		return
 	}
 
@@ -72,7 +71,7 @@ func (sc *slackWebhookClientImpl) SendMessage(target, title, message, color stri
 	// perform actual request
 	response, err := client.Do(request)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed performing http request to Slack")
+		log.Printf("Failed performing http request to Slack: %v", err)
 		return
 	}
 
