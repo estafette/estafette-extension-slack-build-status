@@ -92,8 +92,15 @@ func main() {
 		}
 
 		// set message depending on status
-		title := fmt.Sprintf("Build %v %v!", *buildName, *estafetteBuildStatus)
-		message := fmt.Sprintf("Build *%v* of *%v* %v.", *estafetteBuildVersion, *buildName, *estafetteBuildStatus)
+		title := fmt.Sprintf("Building %v %v!", *buildName, *estafetteBuildStatus)
+		message := fmt.Sprintf("Building version *%v* of *%v* %v.", *estafetteBuildVersion, *buildName, *estafetteBuildStatus)
+
+		releaseName := os.Getenv("ESTAFETTE_RELEASE_NAME")
+		if releaseName != "" {
+			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, releaseName, *estafetteBuildStatus)
+			message = fmt.Sprintf("Releasing *%v* of *%v* to *%v* %v.", *estafetteBuildVersion, *buildName, releaseName, *estafetteBuildStatus)
+		}
+
 		if server != "gocd" {
 			message += fmt.Sprintf(" <%v|See logs for more information>.", logsURL)
 		}
@@ -112,7 +119,7 @@ func main() {
 		for i := range channels {
 			err := slackWebhookClient.SendMessage(channels[i], title, message, color, logsURL)
 			if err != nil {
-				log.Printf("Sending build status to Slack failed: %v", err)
+				log.Printf("Sending status to Slack failed: %v", err)
 				os.Exit(1)
 			}
 		}
