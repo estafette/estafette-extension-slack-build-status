@@ -79,6 +79,7 @@ func main() {
 	if *slackChannels != "" {
 
 		server := os.Getenv("ESTAFETTE_CI_SERVER")
+		releaseName := os.Getenv("ESTAFETTE_RELEASE_NAME")
 
 		var logsURL string
 		if server != "gocd" {
@@ -89,13 +90,21 @@ func main() {
 				os.Getenv("ESTAFETTE_GIT_NAME"),
 				os.Getenv("ESTAFETTE_GIT_REVISION"),
 			)
+
+			if releaseName != "" {
+				logsURL = fmt.Sprintf(
+					"%vpipelines/%v/%v/releases/%v/logs",
+					os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
+					os.Getenv("ESTAFETTE_GIT_SOURCE"),
+					os.Getenv("ESTAFETTE_GIT_NAME"),
+					os.Getenv("ESTAFETTE_RELEASE_ID"),
+				)
+			}
 		}
 
 		// set message depending on status
 		title := fmt.Sprintf("Building %v %v!", *buildName, *estafetteBuildStatus)
 		message := fmt.Sprintf("Building version *%v* of *%v* %v.", *estafetteBuildVersion, *buildName, *estafetteBuildStatus)
-
-		releaseName := os.Getenv("ESTAFETTE_RELEASE_NAME")
 		if releaseName != "" {
 			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, releaseName, *estafetteBuildStatus)
 			message = fmt.Sprintf("Releasing *%v* of *%v* to *%v* %v.", *estafetteBuildVersion, *buildName, releaseName, *estafetteBuildStatus)
