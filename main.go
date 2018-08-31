@@ -67,6 +67,12 @@ func main() {
 		log.Fatal("Either flag slack-webhook-url or slack-extension-webhook has to be set")
 	}
 
+	// set defaults
+	appLabel := os.Getenv("ESTAFETTE_LABEL_APP")
+	if *buildName == "" && appLabel != "" {
+		*buildName = appLabel
+	}
+
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
 	if *slackExtensionWebhookURL != "" {
