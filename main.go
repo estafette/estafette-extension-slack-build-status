@@ -78,6 +78,14 @@ func main() {
 
 	if *slackChannels != "" {
 
+		logsURL := fmt.Sprintf(
+			"%vpipelines/%v/%v/builds/%v/logs",
+			os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
+			os.Getenv("ESTAFETTE_GIT_SOURCE"),
+			os.Getenv("ESTAFETTE_GIT_NAME"),
+			os.Getenv("ESTAFETTE_GIT_REVISION"),
+		)
+
 		// set message depending on status
 		title := ""
 		message := ""
@@ -85,11 +93,11 @@ func main() {
 		switch *estafetteBuildStatus {
 		case "succeeded":
 			title = fmt.Sprintf("Build %v succeeded!", *buildName)
-			message = fmt.Sprintf("Build *%v* of *%v* - branch _%v_ and revision _%v_ - succeeded", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
+			message = fmt.Sprintf("Build *%v* of *%v* succeeded. [See logs for more information](%v)", *estafetteBuildVersion, *buildName, logsURL)
 			color = "good"
 		case "failed":
 			title = fmt.Sprintf("Build %v failed!", *buildName)
-			message = fmt.Sprintf("Build *%v* of *%v* - branch _%v_ and revision _%v_ - failed", *estafetteBuildVersion, *buildName, *gitBranch, *gitRevision)
+			message = fmt.Sprintf("Build *%v* of *%v* failed. [See logs for more information](%v)", *estafetteBuildVersion, *buildName, logsURL)
 			color = "danger"
 		}
 
@@ -97,7 +105,7 @@ func main() {
 		channels := strings.Split(*slackChannels, ",")
 
 		for i := range channels {
-			err := slackWebhookClient.SendMessage(channels[i], title, message, color)
+			err := slackWebhookClient.SendMessage(channels[i], title, message, color, logsURL)
 			if err != nil {
 				log.Printf("Sending build status to Slack failed: %v", err)
 				os.Exit(1)

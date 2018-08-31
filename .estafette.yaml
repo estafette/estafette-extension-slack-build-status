@@ -17,29 +17,34 @@ version:
 
 stages:
   build:
-    image: golang:1.10.2-alpine3.7
+    image: golang:1.11.0-alpine3.7
     workDir: /go/src/github.com/estafette/${ESTAFETTE_LABEL_APP}
+    env:
+      CGO_ENABLED: 0
+      GOOS: linux
     commands:
     - go test `go list ./... | grep -v /vendor/`
-    - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-X main.version=${ESTAFETTE_BUILD_VERSION} -X main.revision=${ESTAFETTE_GIT_REVISION} -X main.branch=${ESTAFETTE_GIT_BRANCH} -X main.buildDate=${ESTAFETTE_BUILD_DATETIME}" -o ./publish/${ESTAFETTE_LABEL_APP} .
+    - go build -a -installsuffix cgo -ldflags "-X main.version=${ESTAFETTE_BUILD_VERSION} -X main.revision=${ESTAFETTE_GIT_REVISION} -X main.branch=${ESTAFETTE_GIT_BRANCH} -X main.buildDate=${ESTAFETTE_BUILD_DATETIME}" -o ./publish/${ESTAFETTE_LABEL_APP} .
 
   bake:
-    image: docker:18.03.1-ce
-    commands:
-    - cp Dockerfile ./publish
-    - cp /etc/ssl/certs/ca-certificates.crt ./publish
-    - docker build -t extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION} ./publish
+    image: extensions/docker:dev
+    action: build
+    container: slack-build-status
+    repositories:
+    - extensions
+    path: ./publish
+    copy:
+    - Dockerfile
+    - /etc/ssl/certs/ca-certificates.crt
 
   push-to-docker-hub:
-    image: docker:18.03.1-ce
-    env:
-      DOCKER_HUB_USERNAME: estafette.secret(3Yi-UBRrdx87H4RP.O7dg2KedDdxlgUiGrL5y040NWyRIf7X7bw==)
-      DOCKER_HUB_PASSWORD: estafette.secret(GcWL0yZSJ72NO0Pw.KuhOy_CiTsYqL2Rloa7hprI3Q_V1_LqnymcbtVVcg7O6Jh8R)
-    commands:
-    - docker login --username=${DOCKER_HUB_USERNAME} --password="${DOCKER_HUB_PASSWORD}"
-    - docker push extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
-    - docker tag extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION} extensions/slack-build-status:dev
-    - docker push extensions/slack-build-status:dev
+    image: extensions/docker:dev
+    action: push
+    container: slack-build-status
+    repositories:
+    - extensions
+    tags:
+    - dev
 
   slack-notify:
     image: extensions/slack-build-status:stable
@@ -52,29 +57,24 @@ stages:
 
 releases:
   beta:
-    tag-container-image:
-      image: docker:18.03.1-ce
-      env:
-        DOCKER_HUB_USERNAME: estafette.secret(_0ev7h12O3XFhlhU.Rj3txIB6mwkf0C20nXsvI23w_g_Dw-v8Ug==)
-        DOCKER_HUB_PASSWORD: estafette.secret(3hHwj9FPPLwpdv2d.fp8NYuy1IbCR7MJvT4OeRhYgkDa8BnrkJSSdbA6Cn2gkr6kh)
-        TARGET_TAG: beta
-      commands:
-      - docker login --username=${DOCKER_HUB_USERNAME} --password="${DOCKER_HUB_PASSWORD}"
-      - docker pull extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
-      - docker tag extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION} extensions/slack-build-status:${TARGET_TAG}
-      - docker push extensions/slack-build-status:${TARGET_TAG}
+    stages:
+      tag-container-image:
+        image: extensions/docker:dev
+        action: tag
+        container: slack-build-status
+        repositories:
+        - extensions
+        tags:
+        - beta
 
   stable:
-    tag-container-image:
-      image: docker:18.03.1-ce
-      env:
-        DOCKER_HUB_USERNAME: estafette.secret(_0ev7h12O3XFhlhU.Rj3txIB6mwkf0C20nXsvI23w_g_Dw-v8Ug==)
-        DOCKER_HUB_PASSWORD: estafette.secret(3hHwj9FPPLwpdv2d.fp8NYuy1IbCR7MJvT4OeRhYgkDa8BnrkJSSdbA6Cn2gkr6kh)
-        TARGET_TAG: stable
-      commands:
-      - docker login --username=${DOCKER_HUB_USERNAME} --password="${DOCKER_HUB_PASSWORD}"
-      - docker pull extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
-      - docker tag extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION} extensions/slack-build-status:${TARGET_TAG}
-      - docker push extensions/slack-build-status:${TARGET_TAG}
-      - docker tag extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION} extensions/slack-build-status:latest
-      - docker push extensions/slack-build-status:latest
+    stages:
+      tag-container-image:
+        image: extensions/docker:dev
+        action: tag
+        container: slack-build-status
+        repositories:
+        - extensions
+        tags:
+        - stable
+        - latest
