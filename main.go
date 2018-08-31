@@ -78,26 +78,31 @@ func main() {
 
 	if *slackChannels != "" {
 
-		logsURL := fmt.Sprintf(
-			"%vpipelines/%v/%v/builds/%v/logs",
-			os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
-			os.Getenv("ESTAFETTE_GIT_SOURCE"),
-			os.Getenv("ESTAFETTE_GIT_NAME"),
-			os.Getenv("ESTAFETTE_GIT_REVISION"),
-		)
+		server := os.Getenv("ESTAFETTE_CI_SERVER")
+
+		var logsURL string
+		if server != "gocd" {
+			logsURL = fmt.Sprintf(
+				"%vpipelines/%v/%v/builds/%v/logs",
+				os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
+				os.Getenv("ESTAFETTE_GIT_SOURCE"),
+				os.Getenv("ESTAFETTE_GIT_NAME"),
+				os.Getenv("ESTAFETTE_GIT_REVISION"),
+			)
+		}
 
 		// set message depending on status
-		title := ""
-		message := ""
+		title := fmt.Sprintf("Build %v %v!", *buildName, *estafetteBuildStatus)
+		message := fmt.Sprintf("Build *%v* of *%v* %v.", *estafetteBuildVersion, *buildName, *estafetteBuildStatus)
+		if server != "gocd" {
+			message += fmt.Sprintf(" <%v|See logs for more information>.", logsURL)
+		}
+
 		color := ""
 		switch *estafetteBuildStatus {
 		case "succeeded":
-			title = fmt.Sprintf("Build %v succeeded!", *buildName)
-			message = fmt.Sprintf("Build *%v* of *%v* succeeded. <%v|See logs for more information>", *estafetteBuildVersion, *buildName, logsURL)
 			color = "good"
 		case "failed":
-			title = fmt.Sprintf("Build %v failed!", *buildName)
-			message = fmt.Sprintf("Build *%v* of *%v* failed. <%v|See logs for more information>", *estafetteBuildVersion, *buildName, logsURL)
 			color = "danger"
 		}
 
