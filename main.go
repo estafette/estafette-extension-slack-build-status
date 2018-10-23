@@ -93,7 +93,7 @@ func main() {
 				"%vpipelines/%v/%v/builds/%v/logs",
 				os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
 				os.Getenv("ESTAFETTE_GIT_SOURCE"),
-				os.Getenv("ESTAFETTE_GIT_NAME"),
+				os.Getenv("ESTAFETTE_GIT_FULLNAME"),
 				os.Getenv("ESTAFETTE_GIT_REVISION"),
 			)
 
@@ -102,7 +102,7 @@ func main() {
 					"%vpipelines/%v/%v/releases/%v/logs",
 					os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
 					os.Getenv("ESTAFETTE_GIT_SOURCE"),
-					os.Getenv("ESTAFETTE_GIT_NAME"),
+					os.Getenv("ESTAFETTE_GIT_FULLNAME"),
 					os.Getenv("ESTAFETTE_RELEASE_ID"),
 				)
 			}
