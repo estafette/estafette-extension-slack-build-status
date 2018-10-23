@@ -45,10 +45,15 @@ var (
 	slackExtensionWebhookURL = kingpin.Flag("slack-extension-webhook", "A slack webhook url to allow sending messages.").Envar("ESTAFETTE_EXTENSION_WEBHOOK").String()
 	slackChannels            = kingpin.Flag("slack-channels", "A comma-separated list of Slack channels to send build status to.").Envar("ESTAFETTE_EXTENSION_CHANNELS").Required().String()
 	buildName                = kingpin.Flag("build-name", "The name of the pipeline that succeeds or fails.").Envar("ESTAFETTE_EXTENSION_NAME").String()
-	gitBranch                = kingpin.Flag("git-branch", "The branch to clone.").Envar("ESTAFETTE_GIT_BRANCH").Required().String()
-	gitRevision              = kingpin.Flag("git-revision", "The revision to check out.").Envar("ESTAFETTE_GIT_REVISION").Required().String()
-	estafetteBuildVersion    = kingpin.Flag("estafette-build-version", "The current build version of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_VERSION").Required().String()
-	estafetteBuildStatus     = kingpin.Flag("estafette-build-status", "The current build status of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_STATUS").Required().String()
+
+	ciBaseURL          = kingpin.Flag("estafette-ci-server-base-url", "The base url of the ci server.").Envar("ESTAFETTE_CI_SERVER_BASE_URL").Required().String()
+	gitRepoSource      = kingpin.Flag("git-repo-source", "The source of the git repository, github.com in this case.").Envar("ESTAFETTE_GIT_SOURCE").Required().String()
+	gitRepoFullname    = kingpin.Flag("git-repo-fullname", "The owner and repo name of the Github repository.").Envar("ESTAFETTE_GIT_FULLNAME").Required().String()
+	estafetteBuildID   = kingpin.Flag("estafette-build-id", "The build id of this particular build.").Envar("ESTAFETTE_BUILD_ID").String()
+	estafetteReleaseID = kingpin.Flag("estafette-release-id", "The release id of this particular release.").Envar("ESTAFETTE_RELEASE_ID").String()
+
+	estafetteBuildVersion = kingpin.Flag("estafette-build-version", "The current build version of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_VERSION").Required().String()
+	estafetteBuildStatus  = kingpin.Flag("estafette-build-status", "The current build status of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_STATUS").Required().String()
 )
 
 func main() {
@@ -91,19 +96,19 @@ func main() {
 		if server != "gocd" {
 			logsURL = fmt.Sprintf(
 				"%vpipelines/%v/%v/builds/%v/logs",
-				os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
-				os.Getenv("ESTAFETTE_GIT_SOURCE"),
-				os.Getenv("ESTAFETTE_GIT_FULLNAME"),
-				os.Getenv("ESTAFETTE_GIT_REVISION"),
+				*ciBaseURL,
+				*gitRepoSource,
+				*gitRepoFullname,
+				*estafetteBuildID,
 			)
 
 			if releaseName != "" {
 				logsURL = fmt.Sprintf(
 					"%vpipelines/%v/%v/releases/%v/logs",
-					os.Getenv("ESTAFETTE_CI_SERVER_BASE_URL"),
-					os.Getenv("ESTAFETTE_GIT_SOURCE"),
-					os.Getenv("ESTAFETTE_GIT_FULLNAME"),
-					os.Getenv("ESTAFETTE_RELEASE_ID"),
+					*ciBaseURL,
+					*gitRepoSource,
+					*gitRepoFullname,
+					*estafetteReleaseID,
 				)
 			}
 		}
