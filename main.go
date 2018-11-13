@@ -54,6 +54,7 @@ var (
 
 	estafetteBuildVersion = kingpin.Flag("estafette-build-version", "The current build version of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_VERSION").Required().String()
 	estafetteBuildStatus  = kingpin.Flag("estafette-build-status", "The current build status of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_STATUS").Required().String()
+	statusOverride        = kingpin.Flag("status-override", "Allow status property in manifest to override the actual build status.").Envar("ESTAFETTE_EXTENSION_STATUS").String()
 )
 
 func main() {
@@ -113,12 +114,18 @@ func main() {
 			}
 		}
 
+		// check if there's a status override
+		status := *estafetteBuildStatus
+		if *statusOverride != "" {
+			status = *statusOverride
+		}
+
 		// set message depending on status
-		title := fmt.Sprintf("Building %v %v!", *buildName, *estafetteBuildStatus)
-		message := fmt.Sprintf("Building version *%v* of *%v* %v.", *estafetteBuildVersion, *buildName, *estafetteBuildStatus)
+		title := fmt.Sprintf("Building %v %v!", *buildName, status)
+		message := fmt.Sprintf("Building version *%v* of *%v* %v.", *estafetteBuildVersion, *buildName, status)
 		if releaseName != "" {
-			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, releaseName, *estafetteBuildStatus)
-			message = fmt.Sprintf("Releasing *%v* of *%v* to *%v* %v.", *estafetteBuildVersion, *buildName, releaseName, *estafetteBuildStatus)
+			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, releaseName, status)
+			message = fmt.Sprintf("Releasing *%v* of *%v* to *%v* %v.", *estafetteBuildVersion, *buildName, releaseName, status)
 		}
 
 		if server != "gocd" {
@@ -126,7 +133,7 @@ func main() {
 		}
 
 		color := ""
-		switch *estafetteBuildStatus {
+		switch status {
 		case "succeeded":
 			color = "good"
 		case "failed":
