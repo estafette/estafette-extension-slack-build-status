@@ -1,5 +1,7 @@
 package main
 
+import "log"
+
 // SlackCredentials are credentials defined in the CI server and injected into this trusted image
 type SlackCredentials struct {
 	Name                 string                               `json:"name,omitempty"`
@@ -17,7 +19,9 @@ type SlackCredentialsAdditionalProperties struct {
 func GetCredentialsByWorkspace(c []SlackCredentials, workspace string) *SlackCredentials {
 
 	for _, cred := range c {
+		log.Printf("Checking credential %v for workspace %v...", cred.Name, workspace)
 		if cred.AdditionalProperties.Workspace == workspace {
+			log.Printf("Found credential %v for workspace %v", cred.Name, workspace)
 			return &cred
 		}
 	}
