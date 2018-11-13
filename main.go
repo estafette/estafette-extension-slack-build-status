@@ -122,7 +122,7 @@ func main() {
 		}
 
 		if server != "gocd" {
-			message += fmt.Sprintf(" <%v|See logs for more information>.", logsURL)
+			//message += fmt.Sprintf(" <%v|See logs for more information>.", logsURL)
 		}
 
 		color := ""
@@ -137,7 +137,7 @@ func main() {
 		channels := strings.Split(*slackChannels, ",")
 
 		for i := range channels {
-			err := slackWebhookClient.SendMessage(channels[i], title, message, color, logsURL)
+			err := slackWebhookClient.SendMessage(channels[i], title, message, color, logsURL, server != "gocd")
 			if err != nil {
 				log.Printf("Sending status to Slack failed: %v", err)
 				os.Exit(1)
