@@ -87,7 +87,7 @@ func main() {
 			}
 
 			log.Printf("Checking if credential %v exists...", *workspace)
-			credential := GetCredentialsByWorkspace(credentials, *workspace)
+			credential = GetCredentialsByWorkspace(credentials, *workspace)
 			if credential == nil {
 				log.Fatalf("Credential with workspace %v does not exist.", *workspace)
 			}
@@ -104,7 +104,7 @@ func main() {
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
 	if credential != nil {
-		log.Printf("Setting webhook from credential: %v", credential.AdditionalProperties.Webhook)
+		// log.Printf("Setting webhook from credential: %v", credential.AdditionalProperties.Webhook)
 		webhookURL = credential.AdditionalProperties.Webhook
 	} else if *slackExtensionWebhookURL != "" {
 		log.Print("Overriding slackWebhookURL with slackExtensionWebhookURL")
