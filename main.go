@@ -104,6 +104,7 @@ func main() {
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
 	if credential != nil {
+		log.Printf("Setting webhook from credential: %v", credential.AdditionalProperties.Webhook)
 		webhookURL = credential.AdditionalProperties.Webhook
 	} else if *slackExtensionWebhookURL != "" {
 		log.Print("Overriding slackWebhookURL with slackExtensionWebhookURL")
@@ -146,10 +147,10 @@ func main() {
 
 		// set message depending on status
 		title := fmt.Sprintf("Building %v %v!", *buildName, status)
-		message := fmt.Sprintf("Build version *%v* of %v %v.", *estafetteBuildVersion, *buildName, status)
+		message := fmt.Sprintf("Build version %v %v.", *estafetteBuildVersion, status)
 		if releaseName != "" {
 			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, releaseName, status)
-			message = fmt.Sprintf("Release *%v* of *%v* to *%v* %v.", *estafetteBuildVersion, *buildName, releaseName, status)
+			message = fmt.Sprintf("Release %v to *%v* %v.", *estafetteBuildVersion, releaseName, status)
 		}
 
 		// split on comma and loop through channels
