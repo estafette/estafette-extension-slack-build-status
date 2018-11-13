@@ -44,10 +44,11 @@ func (sc *slackWebhookClientImpl) SendMessage(target, title, message, status, li
 		Username: "Estafette CI",
 		Attachments: []SlackMessageAttachment{
 			SlackMessageAttachment{
-				Fallback: message,
-				Title:    title,
-				Text:     message,
-				Color:    color,
+				Fallback:  message,
+				Title:     title,
+				TitleLink: link,
+				Text:      message,
+				Color:     color,
 				MarkdownIn: []string{
 					"text",
 				},
