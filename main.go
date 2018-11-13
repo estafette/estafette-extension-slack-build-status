@@ -104,7 +104,7 @@ func main() {
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
 	if credential != nil {
-		webhookURL = credential.AdditionalProperties.Workspace
+		webhookURL = credential.AdditionalProperties.Webhook
 	} else if *slackExtensionWebhookURL != "" {
 		log.Print("Overriding slackWebhookURL with slackExtensionWebhookURL")
 		webhookURL = *slackExtensionWebhookURL
