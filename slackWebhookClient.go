@@ -27,9 +27,17 @@ func NewSlackWebhookClient(webhookURL string) SlackWebhookClient {
 }
 
 // GetAccessToken returns an access token to access the Bitbucket api
-func (sc *slackWebhookClientImpl) SendMessage(target, title, message, color, link string, showLogsButton bool) (err error) {
+func (sc *slackWebhookClientImpl) SendMessage(target, title, message, status, link string, showLogsButton bool) (err error) {
 
 	var requestBody io.Reader
+
+	color := ""
+	switch status {
+	case "succeeded":
+		color = "good"
+	case "failed":
+		color = "danger"
+	}
 
 	slackMessageBody := SlackMessageBody{
 		Channel:  target,
@@ -49,12 +57,21 @@ func (sc *slackWebhookClientImpl) SendMessage(target, title, message, color, lin
 	}
 
 	if showLogsButton {
+
+		style := ""
+		switch status {
+		case "succeeded":
+			style = "primary"
+		case "failed":
+			style = "danger"
+		}
+
 		slackMessageBody.Attachments[0].Actions = []SlackMessageAction{
 			SlackMessageAction{
 				Type:  "button",
 				Text:  "View logs",
 				URL:   link,
-				Style: "primary",
+				Style: style,
 			},
 		}
 	}

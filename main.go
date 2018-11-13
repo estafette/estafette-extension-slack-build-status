@@ -132,19 +132,11 @@ func main() {
 			//message += fmt.Sprintf(" <%v|See logs for more information>.", logsURL)
 		}
 
-		color := ""
-		switch status {
-		case "succeeded":
-			color = "good"
-		case "failed":
-			color = "danger"
-		}
-
 		// split on comma and loop through channels
 		channels := strings.Split(*slackChannels, ",")
 
 		for i := range channels {
-			err := slackWebhookClient.SendMessage(channels[i], title, message, color, logsURL, server != "gocd")
+			err := slackWebhookClient.SendMessage(channels[i], title, message, status, logsURL, server != "gocd")
 			if err != nil {
 				log.Printf("Sending status to Slack failed: %v", err)
 				os.Exit(1)
