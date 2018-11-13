@@ -78,7 +78,7 @@ func main() {
 	var credential *SlackCredentials
 	if *slackWebhookURL == "" && *slackExtensionWebhookURL == "" {
 
-		if *credentialsJSON != "" {
+		if *credentialsJSON != "" && *workspace != "" {
 			log.Printf("Unmarshalling credentials...")
 			var credentials []SlackCredentials
 			err := json.Unmarshal([]byte(*credentialsJSON), &credentials)
@@ -150,7 +150,7 @@ func main() {
 		message := fmt.Sprintf("Build version %v %v.", *estafetteBuildVersion, status)
 		if releaseName != "" {
 			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, releaseName, status)
-			message = fmt.Sprintf("Release %v to *%v* %v.", *estafetteBuildVersion, releaseName, status)
+			message = fmt.Sprintf("Release %v to %v %v.", *estafetteBuildVersion, releaseName, status)
 		}
 
 		// split on comma and loop through channels
