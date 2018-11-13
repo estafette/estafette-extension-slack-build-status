@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -57,6 +58,9 @@ var (
 	estafetteBuildVersion = kingpin.Flag("estafette-build-version", "The current build version of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_VERSION").Required().String()
 	estafetteBuildStatus  = kingpin.Flag("estafette-build-status", "The current build status of the Estafette pipeline.").Envar("ESTAFETTE_BUILD_STATUS").Required().String()
 	statusOverride        = kingpin.Flag("status-override", "Allow status property in manifest to override the actual build status.").Envar("ESTAFETTE_EXTENSION_STATUS").String()
+
+	workspace       = kingpin.Flag("slack-extension-workspace", "A slack workspace.").Envar("ESTAFETTE_EXTENSION_WORKSPACE").String()
+	credentialsJSON = kingpin.Flag("credentials", "Slack credentials configured at server level, passed in to this trusted extension.").Envar("ESTAFETTE_CREDENTIALS_SLACK_WEBHOOK").String()
 )
 
 func main() {
@@ -71,8 +75,25 @@ func main() {
 	// log startup message
 	log.Printf("Starting estafette-extension-slack-build-status version %v...", version)
 
+	var credential *SlackCredentials
 	if *slackWebhookURL == "" && *slackExtensionWebhookURL == "" {
-		log.Fatal("Either flag slack-webhook-url or slack-extension-webhook has to be set")
+
+		if *credentialsJSON != "" {
+			log.Printf("Unmarshalling credentials...")
+			var credentials []SlackCredentials
+			err := json.Unmarshal([]byte(*credentialsJSON), &credentials)
+			if err != nil {
+				log.Fatal("Failed unmarshalling credentials: ", err)
+			}
+
+			log.Printf("Checking if credential %v exists...", *workspace)
+			credential := GetCredentialsByWorkspace(credentials, *workspace)
+			if credential == nil {
+				log.Fatalf("Credential with workspace %v does not exist.", *workspace)
+			}
+		} else {
+			log.Fatal("Either flag slack-webhook-url or slack-extension-webhook has to be set")
+		}
 	}
 
 	// set defaults
@@ -82,7 +103,9 @@ func main() {
 
 	// pick via whatever method the webhook url has been set
 	webhookURL := *slackWebhookURL
-	if *slackExtensionWebhookURL != "" {
+	if credential != nil {
+		webhookURL = credential.AdditionalProperties.Workspace
+	} else if *slackExtensionWebhookURL != "" {
 		log.Print("Overriding slackWebhookURL with slackExtensionWebhookURL")
 		webhookURL = *slackExtensionWebhookURL
 	}
