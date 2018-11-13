@@ -63,6 +63,20 @@ stages:
 releases:
   beta:
     stages:
+      test-success:
+        image: extensions/slack-build-status:dev
+        workspace: estafette
+        channels:
+        - '#build-status'
+        status: succeeded
+
+      test-failure:
+        image: extensions/slack-build-status:dev
+        workspace: estafette
+        channels:
+        - '#build-status'
+        status: failed
+
       tag-container-image:
         image: extensions/docker:dev
         action: tag
