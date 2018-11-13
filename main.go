@@ -33,6 +33,7 @@ var (
 //
 // slack-notify:
 //   image: extensions/slack-build-status:dev
+//   workspace: estafette
 //   channels:
 //   - "#build-status"
 //   users:
@@ -49,7 +50,7 @@ var (
 
 	appLabel = kingpin.Flag("app-name", "App label, used as application name if not passed explicitly.").Envar("ESTAFETTE_LABEL_APP").String()
 
-	ciBaseURL          = kingpin.Flag("estafette-ci-server-base-url", "The base url of the ci server.").Envar("ESTAFETTE_CI_SERVER_BASE_URL").Required().String()
+	ciBaseURL          = kingpin.Flag("estafette-ci-server-base-url", "The base url of the ci server.").Envar("ESTAFETTE_CI_SERVER_BASE_URL").String()
 	gitRepoSource      = kingpin.Flag("git-repo-source", "The source of the git repository, github.com in this case.").Envar("ESTAFETTE_GIT_SOURCE").Required().String()
 	gitRepoFullname    = kingpin.Flag("git-repo-fullname", "The owner and repo name of the Github repository.").Envar("ESTAFETTE_GIT_FULLNAME").Required().String()
 	estafetteBuildID   = kingpin.Flag("estafette-build-id", "The build id of this particular build.").Envar("ESTAFETTE_BUILD_ID").String()
