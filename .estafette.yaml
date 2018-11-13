@@ -40,7 +40,6 @@ stages:
   test-success:
     image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
     webhook: estafette.secret(IUcwmw0ZhriLvqhD.4DOkD1-c_44STKbxbD3n4zzz67SYJCcW0_4RKWbL7LefQW4zjRU8UOrANuY9xC89BRmVmXf4GppNt5SULEjx6VI_CcdlfXbCQlgkTs3pO2a66-0Q9k0W7t7nrUif)
-    name: 'integration test estafette-extension-slack-build-status'
     channels:
     - '#build-status'
     status: succeeded
@@ -48,7 +47,6 @@ stages:
   test-failure:
     image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
     webhook: estafette.secret(IUcwmw0ZhriLvqhD.4DOkD1-c_44STKbxbD3n4zzz67SYJCcW0_4RKWbL7LefQW4zjRU8UOrANuY9xC89BRmVmXf4GppNt5SULEjx6VI_CcdlfXbCQlgkTs3pO2a66-0Q9k0W7t7nrUif)
-    name: 'integration test estafette-extension-slack-build-status'
     channels:
     - '#build-status'
     status: failed
@@ -61,15 +59,6 @@ stages:
     - extensions
     tags:
     - dev
-
-  slack-notify:
-    image: extensions/slack-build-status:stable
-    webhook: estafette.secret(IUcwmw0ZhriLvqhD.4DOkD1-c_44STKbxbD3n4zzz67SYJCcW0_4RKWbL7LefQW4zjRU8UOrANuY9xC89BRmVmXf4GppNt5SULEjx6VI_CcdlfXbCQlgkTs3pO2a66-0Q9k0W7t7nrUif)
-    name: ${ESTAFETTE_LABEL_APP}
-    channels:
-    - '#build-status'
-    when:
-      status == 'failed'
 
 releases:
   beta:
