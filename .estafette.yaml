@@ -40,14 +40,14 @@ stages:
     image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
     workspace: estafette
     channels:
-    - '#build-status'
+    - '#test-status'
     status: succeeded
 
   test-failure:
     image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
     workspace: estafette
     channels:
-    - '#build-status'
+    - '#test-status'
     status: failed
 
   push-to-docker-hub:
