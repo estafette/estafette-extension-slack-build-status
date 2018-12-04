@@ -18,7 +18,7 @@ version:
 stages:
   build:
     image: golang:1.11.2-alpine3.8
-    workDir: /go/src/github.com/estafette/${ESTAFETTE_LABEL_APP}
+    workDir: /go/src/${ESTAFETTE_GIT_SOURCE}/${ESTAFETTE_GIT_OWNER}/${ESTAFETTE_GIT_NAME}
     env:
       CGO_ENABLED: 0
       GOOS: linux
@@ -34,7 +34,6 @@ stages:
     - extensions
     path: ./publish
     copy:
-    - Dockerfile
     - /etc/ssl/certs/ca-certificates.crt
 
   test-success:
@@ -99,7 +98,7 @@ releases:
         image: extensions/slack-build-status:stable
         workspace: estafette
         channels:
-        - '#build-status'
+        - '#release-status'
         when:
           status == 'succeeded' ||
           status == 'failed'
@@ -120,7 +119,7 @@ releases:
         image: extensions/slack-build-status:stable
         workspace: estafette
         channels:
-        - '#build-status'
+        - '#release-status'
         when:
           status == 'succeeded' ||
           status == 'failed'
