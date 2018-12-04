@@ -62,6 +62,9 @@ var (
 
 	workspace       = kingpin.Flag("slack-extension-workspace", "A slack workspace.").Envar("ESTAFETTE_EXTENSION_WORKSPACE").String()
 	credentialsJSON = kingpin.Flag("credentials", "Slack credentials configured at server level, passed in to this trusted extension.").Envar("ESTAFETTE_CREDENTIALS_SLACK_WEBHOOK").String()
+
+	releaseName   = kingpin.Flag("release-name", "Name of the release section, automatically set by Estafette CI.").Envar("ESTAFETTE_RELEASE_NAME").String()
+	releaseAction = kingpin.Flag("release-action", "Name of the release action, automatically set by Estafette CI.").Envar("ESTAFETTE_RELEASE_ACTION").String()
 )
 
 func main() {
@@ -117,7 +120,6 @@ func main() {
 	if *slackChannels != "" {
 
 		server := os.Getenv("ESTAFETTE_CI_SERVER")
-		releaseName := os.Getenv("ESTAFETTE_RELEASE_NAME")
 
 		var logsURL string
 		if server != "gocd" {
@@ -129,7 +131,7 @@ func main() {
 				*estafetteBuildID,
 			)
 
-			if releaseName != "" {
+			if *releaseName != "" {
 				logsURL = fmt.Sprintf(
 					"%vpipelines/%v/%v/releases/%v/logs",
 					*ciBaseURL,
@@ -149,9 +151,13 @@ func main() {
 		// set message depending on status
 		title := fmt.Sprintf("Building %v %v!", *buildName, status)
 		message := fmt.Sprintf("Build version %v %v.", *estafetteBuildVersion, status)
-		if releaseName != "" {
-			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, releaseName, status)
-			message = fmt.Sprintf("Release %v to %v %v.", *estafetteBuildVersion, releaseName, status)
+		if *releaseName != "" {
+			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, *releaseName, status)
+			message = fmt.Sprintf("Release %v to %v %v.", *estafetteBuildVersion, *releaseName, status)
+			if *releaseAction != "" {
+				title = fmt.Sprintf("Releasing %v:%v to %v %v!", *releaseAction, *buildName, *releaseName, status)
+				message = fmt.Sprintf("Release %v:%v to %v %v.", *releaseAction, *estafetteBuildVersion, *releaseName, status)
+			}
 		}
 
 		// split on comma and loop through channels
