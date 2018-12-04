@@ -155,8 +155,8 @@ func main() {
 			title = fmt.Sprintf("Releasing %v to %v %v!", *buildName, *releaseName, status)
 			message = fmt.Sprintf("Release %v to %v %v.", *estafetteBuildVersion, *releaseName, status)
 			if *releaseAction != "" {
-				title = fmt.Sprintf("Releasing %v:%v to %v %v!", *releaseAction, *buildName, *releaseName, status)
-				message = fmt.Sprintf("Release %v:%v to %v %v.", *releaseAction, *estafetteBuildVersion, *releaseName, status)
+				title = fmt.Sprintf("Releasing %v to %v with %v %v!", *buildName, *releaseName, *releaseAction, status)
+				message = fmt.Sprintf("Release %v to %v with %v %v.", *estafetteBuildVersion, *releaseName, *releaseAction, status)
 			}
 		}
 
