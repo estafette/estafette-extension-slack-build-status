@@ -71,11 +71,6 @@ stages:
 releases:
   beta:
     stages:
-      triggered-by:
-        image: golang:1.11.4-alpine3.8
-        commands:
-        - echo "Release triggered by ${ESTAFETTE_RELEASE_TRIGGERED_BY}"
-
       test-success:
         image: extensions/slack-build-status:dev
         workspace: estafette
