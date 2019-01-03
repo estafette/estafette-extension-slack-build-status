@@ -17,7 +17,7 @@ version:
 
 stages:
   build:
-    image: golang:1.11.2-alpine3.8
+    image: golang:1.11.4-alpine3.8
     workDir: /go/src/${ESTAFETTE_GIT_SOURCE}/${ESTAFETTE_GIT_OWNER}/${ESTAFETTE_GIT_NAME}
     env:
       CGO_ENABLED: 0
@@ -71,6 +71,11 @@ stages:
 releases:
   beta:
     stages:
+      triggered-by:
+        image: golang:1.11.4-alpine3.8
+        commands:
+        - echo "Release triggered by ${ESTAFETTE_RELEASE_TRIGGERED_BY}"
+
       test-success:
         image: extensions/slack-build-status:dev
         workspace: estafette
