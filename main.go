@@ -25,7 +25,7 @@ var (
 //   image: golang:1.8.3-alpine3.6
 //   commands:
 //   - apk --update add curl
-//   - 'curl -X POST --data-urlencode ''payload={"channel": "#build-status", "username": "estafette-extension-slack-build-status", "text": "Build ''${ESTAFETTE_BUILD_VERSION}'' for ''${ESTAFETTE_LABEL_APP}'' has failed!"}'' ${ESTAFETTE_SLACK_WEBHOOK}'
+//   - 'curl -X POST --data-urlencode ''payload={"channel": "#build-status", "username": "estafette-extension-slack-build-status", "text": "Build ''${ESTAFETTE_BUILD_VERSION}'' for ''${ESTAFETTE_GIT_NAME}'' has failed!"}'' ${ESTAFETTE_SLACK_WEBHOOK}'
 //   when:
 //     status == 'failed'
 
@@ -48,6 +48,7 @@ var (
 	slackChannels            = kingpin.Flag("slack-channels", "A comma-separated list of Slack channels to send build status to.").Envar("ESTAFETTE_EXTENSION_CHANNELS").Required().String()
 	buildName                = kingpin.Flag("build-name", "The name of the pipeline that succeeds or fails.").Envar("ESTAFETTE_EXTENSION_NAME").String()
 
+	gitName  = kingpin.Flag("git-name", "Repository name, used as application name if not passed explicitly and app label not being set.").Envar("ESTAFETTE_GIT_NAME").String()
 	appLabel = kingpin.Flag("app-name", "App label, used as application name if not passed explicitly.").Envar("ESTAFETTE_LABEL_APP").String()
 
 	ciBaseURL          = kingpin.Flag("estafette-ci-server-base-url", "The base url of the ci server.").Envar("ESTAFETTE_CI_SERVER_BASE_URL").String()
@@ -101,6 +102,9 @@ func main() {
 	}
 
 	// set defaults
+	if *buildName == "" && *appLabel == "" && *gitName != "" {
+		*buildName = *gitName
+	}
 	if *buildName == "" && *appLabel != "" {
 		*buildName = *appLabel
 	}
