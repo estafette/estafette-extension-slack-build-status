@@ -62,8 +62,6 @@ stages:
     container: slack-build-status
     repositories:
     - extensions
-    tags:
-    - dev
 
   slack-notify:
     image: extensions/slack-build-status:stable
@@ -75,22 +73,37 @@ stages:
       status == 'failed'
 
 releases:
-  beta:
+  dev:
+    triggers:
+    - pipeline:
+        name: self
+        branch: .+
     stages:
       test-success:
-        image: extensions/slack-build-status:dev
+        image: extensions/slack-build-status:#{ESTAFETTE_BUILD_VERSION}
         workspace: estafette
         channels:
         - '#test-status'
         status: succeeded
 
       test-failure:
-        image: extensions/slack-build-status:dev
+        image: extensions/slack-build-status:#{ESTAFETTE_BUILD_VERSION}
         workspace: estafette
         channels:
         - '#test-status'
         status: failed
 
+      tag-container-image:
+        image: extensions/docker:dev
+        action: tag
+        container: slack-build-status
+        repositories:
+        - extensions
+        tags:
+        - dev
+
+  beta:
+    stages:
       tag-container-image:
         image: extensions/docker:dev
         action: tag
