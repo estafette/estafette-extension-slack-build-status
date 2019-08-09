@@ -80,14 +80,14 @@ releases:
         branch: .+
     stages:
       test-success:
-        image: extensions/slack-build-status:#{ESTAFETTE_BUILD_VERSION}
+        image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
         workspace: estafette
         channels:
         - '#test-status'
         status: succeeded
 
       test-failure:
-        image: extensions/slack-build-status:#{ESTAFETTE_BUILD_VERSION}
+        image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
         workspace: estafette
         channels:
         - '#test-status'
