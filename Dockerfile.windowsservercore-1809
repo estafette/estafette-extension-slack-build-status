@@ -1,0 +1,5 @@
+FROM mcr.microsoft.com/windows/servercore:1809
+
+COPY estafette-extension-slack-build-status.exe c:/estafette-extension-slack-build-status.exe
+
+ENTRYPOINT ["C:/estafette-extension-slack-build-status.exe"]
