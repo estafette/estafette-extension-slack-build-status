@@ -46,6 +46,7 @@ var (
 	slackWebhookURL          = kingpin.Flag("slack-webhook-url", "A slack webhook url to allow sending messages.").Envar("ESTAFETTE_SLACK_WEBHOOK").String()
 	slackExtensionWebhookURL = kingpin.Flag("slack-extension-webhook", "A slack webhook url to allow sending messages.").Envar("ESTAFETTE_EXTENSION_WEBHOOK").String()
 	slackChannels            = kingpin.Flag("slack-channels", "A comma-separated list of Slack channels to send build status to.").Envar("ESTAFETTE_EXTENSION_CHANNELS").Required().String()
+	slackTitle               = kingpin.Flag("slack-title", "A custom slack message title.").Envar("ESTAFETTE_EXTENSION_TITLE").String()
 	buildName                = kingpin.Flag("build-name", "The name of the pipeline that succeeds or fails.").Envar("ESTAFETTE_EXTENSION_NAME").String()
 
 	gitName  = kingpin.Flag("git-name", "Repository name, used as application name if not passed explicitly and app label not being set.").Envar("ESTAFETTE_GIT_NAME").String()
@@ -162,6 +163,11 @@ func main() {
 				title = fmt.Sprintf("Releasing %v to %v with %v %v!", *buildName, *releaseName, *releaseAction, status)
 				message = fmt.Sprintf("Release %v to %v with %v %v.", *estafetteBuildVersion, *releaseName, *releaseAction, status)
 			}
+		}
+
+		// apply custom title if provided
+		if *slackTitle != "" {
+			title = *slackTitle
 		}
 
 		// split on comma and loop through channels
