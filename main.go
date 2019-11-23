@@ -9,9 +9,12 @@ import (
 	"strings"
 
 	"github.com/alecthomas/kingpin"
+	foundation "github.com/estafette/estafette-foundation"
 )
 
 var (
+	appgroup  string
+	app       string
 	version   string
 	branch    string
 	revision  string
@@ -74,12 +77,8 @@ func main() {
 	// parse command line parameters
 	kingpin.Parse()
 
-	// log to stdout and hide timestamp
-	log.SetOutput(os.Stdout)
-	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-
-	// log startup message
-	log.Printf("Starting estafette-extension-slack-build-status version %v...", version)
+	// init log format from envvar ESTAFETTE_LOG_FORMAT
+	foundation.InitLoggingFromEnv(appgroup, app, version, branch, revision, buildDate)
 
 	var credential *SlackCredentials
 	if *slackWebhookURL == "" && *slackExtensionWebhookURL == "" {
