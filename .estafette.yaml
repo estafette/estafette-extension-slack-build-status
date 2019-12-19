@@ -43,26 +43,44 @@ stages:
     copy:
     - /etc/ssl/certs/ca-certificates.crt
 
-  test-success:
-    image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
-    workspace: estafette
-    channels:
-    - '#test-status'
-    status: succeeded
+  check-container:
+    parallelStages:
+      check-efficiency:
+        image: extensions/docker:dev
+        action: dive
+        container: slack-build-status
+        repositories:
+        - extensions
 
-  test-failure:
-    image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
-    workspace: estafette
-    channels:
-    - '#test-status'
-    status: failed
+      vulnerability-scan:
+        image: extensions/docker:dev
+        action: trivy
+        container: slack-build-status
+        repositories:
+        - extensions
 
-  push-to-docker-hub:
-    image: extensions/docker:dev
-    action: push
-    container: slack-build-status
-    repositories:
-    - extensions
+  tests:
+    parallelStages:
+      test-success:
+        image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
+        workspace: estafette
+        channels:
+        - '#test-status'
+        status: succeeded
+
+      test-failure:
+        image: extensions/slack-build-status:${ESTAFETTE_BUILD_VERSION}
+        workspace: estafette
+        channels:
+        - '#test-status'
+        status: failed
+
+      push-to-docker-hub:
+        image: extensions/docker:dev
+        action: push
+        container: slack-build-status
+        repositories:
+        - extensions
 
   slack-notify:
     image: extensions/slack-build-status:stable
