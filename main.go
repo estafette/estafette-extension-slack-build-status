@@ -3,13 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
 
 	"github.com/alecthomas/kingpin"
 	foundation "github.com/estafette/estafette-foundation"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -66,7 +67,7 @@ var (
 	statusOverride        = kingpin.Flag("status-override", "Allow status property in manifest to override the actual build status.").Envar("ESTAFETTE_EXTENSION_STATUS").String()
 
 	workspace       = kingpin.Flag("slack-extension-workspace", "A slack workspace.").Envar("ESTAFETTE_EXTENSION_WORKSPACE").String()
-	credentialsJSON = kingpin.Flag("credentials", "Slack credentials configured at server level, passed in to this trusted extension.").Envar("ESTAFETTE_CREDENTIALS_SLACK_WEBHOOK").String()
+	credentialsPath = kingpin.Flag("credentials-path", "Path to file with Slack credentials configured at server level, passed in to this trusted extension.").Default("/credentials/slack_webhook.json").String()
 
 	releaseName   = kingpin.Flag("release-name", "Name of the release section, automatically set by Estafette CI.").Envar("ESTAFETTE_RELEASE_NAME").String()
 	releaseAction = kingpin.Flag("release-action", "Name of the release action, automatically set by Estafette CI.").Envar("ESTAFETTE_RELEASE_ACTION").String()
@@ -83,21 +84,35 @@ func main() {
 	var credential *SlackCredentials
 	if *slackWebhookURL == "" && *slackExtensionWebhookURL == "" {
 
-		if *credentialsJSON != "" && *workspace != "" {
+		if *workspace != "" {
 			log.Printf("Unmarshalling credentials...")
 			var credentials []SlackCredentials
-			err := json.Unmarshal([]byte(*credentialsJSON), &credentials)
-			if err != nil {
-				log.Fatal("Failed unmarshalling credentials: ", err)
+
+			// use mounted credential file if present instead of relying on an envvar
+			if runtime.GOOS == "windows" {
+				*credentialsPath = "C:" + *credentialsPath
+			}
+			if foundation.FileExists(*credentialsPath) {
+				log.Info().Msgf("Reading credentials from file at path %v...", *credentialsPath)
+				credentialsFileContent, err := ioutil.ReadFile(*credentialsPath)
+				if err != nil {
+					log.Fatal().Msgf("Failed reading credential file at path %v.", *credentialsPath)
+				}
+				err = json.Unmarshal(credentialsFileContent, &credentials)
+				if err != nil {
+					log.Fatal().Err(err).Msg("Failed unmarshalling injected credentials")
+				}
+			} else {
+				log.Fatal().Msg("Credentials of type kubernetes-engine are not injected; configure this extension as trusted and inject credentials of type kubernetes-engine")
 			}
 
 			log.Printf("Checking if credential %v exists...", *workspace)
 			credential = GetCredentialsByWorkspace(credentials, *workspace)
 			if credential == nil {
-				log.Fatalf("Credential with workspace %v does not exist.", *workspace)
+				log.Fatal().Msgf("Credential with workspace %v does not exist.", *workspace)
 			}
 		} else {
-			log.Fatal("Either flag slack-webhook-url or slack-extension-webhook has to be set")
+			log.Fatal().Msg("Either flag slack-webhook-url or slack-extension-webhook has to be set")
 		}
 	}
 

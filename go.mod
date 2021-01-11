@@ -9,6 +9,7 @@ require (
 	github.com/alecthomas/repr v0.0.0-20181024024818-d37bc2a10ba1 // indirect
 	github.com/estafette/estafette-foundation v0.0.34
 	github.com/mattn/go-isatty v0.0.6 // indirect
+	github.com/rs/zerolog v1.15.0
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/sethgrid/pester v0.0.0-20170816164208-a86a2d88f4dc
 )
