@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/windows/servercore:ltsc2019
+FROM mcr.microsoft.com/windows/nanoserver:1809
 
 COPY estafette-extension-slack-build-status.exe C:/estafette-extension-slack-build-status.exe
 
