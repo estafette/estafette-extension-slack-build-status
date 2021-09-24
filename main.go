@@ -81,6 +81,11 @@ func main() {
 	// init log format from envvar ESTAFETTE_LOG_FORMAT
 	foundation.InitLoggingFromEnv(appgroup, app, version, branch, revision, buildDate)
 
+	// make sure ciBaseURL ends with a slash
+	if !strings.HasSuffix(*ciBaseURL, "/") {
+		*ciBaseURL = *ciBaseURL + "/"
+	}
+
 	var credential *SlackCredentials
 	if *slackWebhookURL == "" && *slackExtensionWebhookURL == "" {
 
